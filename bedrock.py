@@ -9,6 +9,8 @@ import logging
 import os
 
 import boto3
+import sqlalchemy
+from sqlalchemy import create_engine
 import pandas as pd
 import streamlit as st
 import yaml
@@ -82,13 +84,18 @@ def main():
 
     # define datasource uri
     # rds_uri = get_rds_uri(REGION_NAME)
-    rds_uri = "postgresql+psycopg2://yuchizh:9U{tzgpe5275QeaDj>U1VF#Um#lk@nlqmainstack-rdsdbinstance-dapfswxmwa9h.csx2gvelon98.us-east-1.rds.amazonaws.com:5432/moma"
-    db = SQLDatabase.from_uri(rds_uri)
+    # rds_uri = "postgresql+psycopg2://yuchizh:9U{tzgpe5275QeaDj>U1VF#Um#lk@nlqmainstack-rdsdbinstance-dapfswxmwa9h.csx2gvelon98.us-east-1.rds.amazonaws.com:5432/moma"
+    # db = SQLDatabase.from_uri(rds_uri)
+   
+    connection_string = f"redshift+redshift_connector://yuchizh:Zhen6161@redshift-cluster-1.cxq9sq6qft9q.us-east-1.redshift.amazonaws.com:5439/dev"
+    engine_redshift = create_engine(connection_string, echo=False)
+    dbredshift = SQLDatabase(engine_redshift)
 
     # load examples for few-shot prompting
     examples = load_samples()
 
-    sql_db_chain = load_few_shot_chain(llm, db, examples)
+    # sql_db_chain = load_few_shot_chain(llm, db, examples)
+    sql_db_chain = load_few_shot_chain(llm, dbredshift, examples)
 
     # store the initial value of widgets in session state
     if "visibility" not in st.session_state:
